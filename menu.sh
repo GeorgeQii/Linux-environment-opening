@@ -14,7 +14,8 @@ print_menu() {
     echo "4) 配置 Docker 镜像站"
     echo "5) 安装网心云并自动更新"
     echo "6) 打印重要的系统信息和错误信息"
-    echo "7) 退出"
+    echo "7) 配置代理"
+    echo "8) 退出"
 }
 
 # 安装 AdGuard Home
@@ -44,8 +45,7 @@ install_docker() {
 # 配置 Docker 镜像站
 configure_docker_mirror() {
     echo -e "${GREEN}配置 Docker 镜像站...${NC}"
-    sudo vi /etc/docker/daemon.json
-    cat <<EOF | sudo tee /etc/docker/daemon.json > /dev/null
+    sudo bash -c 'cat <<EOF | sudo tee /etc/docker/daemon.json > /dev/null
 {
     "registry-mirrors": [
         "https://docker.m.daocloud.io",
@@ -53,7 +53,7 @@ configure_docker_mirror() {
         "https://hub.rat.dev"
     ]
 }
-EOF
+EOF'
     sudo service docker restart
     echo -e "${GREEN}Docker 镜像站配置完成并已重启 Docker 服务！${NC}"
 }
@@ -80,10 +80,21 @@ print_system_info() {
     dmesg | grep -i error
 }
 
+# 配置代理
+configure_proxy() {
+    echo -e "${GREEN}配置代理...${NC}"
+    read -p "请输入代理 IP 地址: " ip
+    read -p "请输入代理端口: " port
+    sudo bash -c "echo 'export http_proxy=http://$ip:$port/' >> /etc/environment"
+    sudo bash -c "echo 'export https_proxy=https://$ip:$port/' >> /etc/environment"
+    sudo bash -c "echo 'export no_proxy=localhost,127.0.0.1' >> /etc/environment"
+    echo -e "${GREEN}代理配置完成！${NC}"
+}
+
 # 主程序
 while true; do
     print_menu
-    read -p "请输入选项（1-7）： " choice
+    read -p "请输入选项（1-8）： " choice
     case $choice in
         1)
             install_adguardhome
@@ -104,6 +115,9 @@ while true; do
             print_system_info
             ;;
         7)
+            configure_proxy
+            ;;
+        8)
             echo -e "${GREEN}退出程序...${NC}"
             exit 0
             ;;
