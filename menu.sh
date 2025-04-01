@@ -15,7 +15,8 @@ print_menu() {
     echo "5) 安装网心云并自动更新"
     echo "6) 打印重要的系统信息和错误信息"
     echo "7) 配置代理"
-    echo "8) 退出"
+    echo "8) 删除代理配置"
+    echo "9) 退出"
 }
 
 # 安装 AdGuard Home
@@ -91,10 +92,19 @@ configure_proxy() {
     echo -e "${GREEN}代理配置完成！${NC}"
 }
 
+# 删除代理配置
+remove_proxy() {
+    echo -e "${GREEN}删除代理配置...${NC}"
+    sudo sed -i '/export http_proxy/d' /etc/environment
+    sudo sed -i '/export https_proxy/d' /etc/environment
+    sudo sed -i '/export no_proxy/d' /etc/environment
+    echo -e "${GREEN}代理配置已删除！${NC}"
+}
+
 # 主程序
 while true; do
     print_menu
-    read -p "请输入选项（1-8）： " choice
+    read -p "请输入选项（1-9）： " choice
     case $choice in
         1)
             install_adguardhome
@@ -118,6 +128,9 @@ while true; do
             configure_proxy
             ;;
         8)
+            remove_proxy
+            ;;
+        9)
             echo -e "${GREEN}退出程序...${NC}"
             exit 0
             ;;
